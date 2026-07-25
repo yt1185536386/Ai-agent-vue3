@@ -1,0 +1,20 @@
+# 依赖目录 (忽略所有子项目下的 node_modules)
+node_modules/
+**/node_modules/
+
+# 构建产物 (Vue/Vite 项目通常是 dist)
+dist/
+**/dist/
+
+# 环境变量文件 (保护密钥不泄露)
+.env
+.env.local
+.env.production
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE 配置文件 (可选)
+.vscode/
+.idea/
