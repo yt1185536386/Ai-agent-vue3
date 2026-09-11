@@ -1,0 +1,16 @@
+[
+  {
+    "id": "weather-then-calc",
+    "user_id": "eval",
+    "steps": [
+      {
+        "user": "长沙今天天气怎么样",
+        "expect_tools": ["get_weather"]
+      },
+      {
+        "user": "把刚才说的最高温度乘以 2 是多少",
+        "expect_tools": ["calculator"]
+      }
+    ]
+  }
+]

@@ -1,0 +1,58 @@
+server:
+  port: ${PORT:6016}
+
+spring:
+  application:
+    name: rag-service
+  # 默认使用 H2 内存库，零依赖即可启动；生产环境可切到 PostgreSQL（见 application-pgvector.yml）
+  datasource:
+    url: jdbc:h2:mem:rag_service;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jackson:
+    default-property-inclusion: non_null
+
+rag:
+  jwt:
+    # 与 model-gateway / NestJS 网关共享的 JWT 秘密（只校验不签发）
+    secret: ${JWT_SECRET:model-gateway-dev-secret-key-please-change-in-prod}
+  gateway:
+    # 模型网关地址（rag-service 通过它调用 /v1/embeddings 和 /v1/chat/completions）
+    base-url: ${GATEWAY_BASE_URL:http://localhost:6015}
+    # 与 model-gateway 的 gateway.service-key 同值，用于内部服务鉴权
+    service-key: ${GATEWAY_SERVICE_KEY:}
+  model:
+    # 渠道 key：rag-service 启动时会调用 model-gateway /v1/channels/{key} 自动获取模型列表
+    # 设置为空则使用下面的 fallback embedding/chat 模型名
+    channel-key: ${MODEL_CHANNEL_KEY:}
+    # 兜底模型名（当 channel-key 未配置或解析失败时使用）
+    embedding-model: ${EMBEDDING_MODEL:text-embedding-v3}
+    chat-model: ${CHAT_MODEL:qwen-plus}
+  retrieval:
+    # 默认检索 Top-K 文本块
+    top-k: ${RETRIEVAL_TOP_K:5}
+  chunk:
+    # 语义切分参数：maxSize 为 chunk 最大字符数，overlap-ratio 为重叠比例（相对 maxSize）
+    size: ${CHUNK_SIZE:500}
+    overlap-ratio: ${CHUNK_OVERLAP_RATIO:0.1}
+  vector:
+    # 默认使用内存向量存储，零依赖启动；生产切到 pgvector（见 application-pgvector.yml）
+    mode: ${VECTOR_MODE:memory}
+    # 向量维度，需与 embedding 模型输出维度一致
+    dimension: ${VECTOR_DIMENSION:1536}
+
+logging:
+  level:
+    root: info
+    com.v3agent.rag: debug

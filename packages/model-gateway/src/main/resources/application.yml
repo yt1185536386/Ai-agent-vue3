@@ -1,0 +1,52 @@
+server:
+  port: ${PORT:6015}
+  # 优雅停机:收到 SIGTERM 后停止接新请求,存量请求(含 SSE 流)排空后再退出
+  shutdown: graceful
+
+spring:
+  application:
+    name: model-gateway
+  lifecycle:
+    # 优雅停机最长等待时间
+    timeout-per-shutdown-phase: 30s
+  datasource:
+    url: jdbc:h2:mem:gateway;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        # 保持 camelCase 列名,与 NestJS(TypeORM)既有表结构一致,可共用 MySQL 库
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jackson:
+    default-property-inclusion: non_null
+
+gateway:
+  # /v1/** 内部服务密钥(ai-service 等内部调用方持有,与 NESTJS_SERVICE_KEY 同值)
+  service-key: ${GATEWAY_SERVICE_KEY:}
+  # 跨域白名单(逗号分隔,支持 origin pattern);生产环境必须显式配置
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:6012,http://localhost:6013}
+  jwt:
+    # 只校验 NestJS 签发的 JWT(共享密钥),本网关不签发,故无过期时间配置
+    secret: ${JWT_SECRET:model-gateway-dev-secret-key-please-change-in-prod}
+  invoke:
+    connect-timeout-ms: 5000
+    read-timeout-ms: 60000
+  seed:
+    enabled: true        # 首次启动写入 admin 账号 / 示例渠道 / 演示调用日志
+
+logging:
+  level:
+    root: info
+    com.v3agent.gateway: debug
+  # 日志行内嵌 requestId(RequestIdFilter 写入 MDC),与 invoke_logs.requestId 对应
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId:-}] %logger{36} - %msg%n"

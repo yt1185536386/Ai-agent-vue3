@@ -1,0 +1,16 @@
+# PostgreSQL + pgvector 生产/本地开发配置
+# 使用方式：mvn spring-boot:run -Dspring-boot.run.profiles=pgvector
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_DATABASE:rag_db}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:rag}
+    password: ${DB_PASSWORD:rag}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+rag:
+  vector:
+    mode: pgvector

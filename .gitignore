@@ -1,0 +1,44 @@
+# 依赖目录 (忽略所有子项目下的 node_modules)
+node_modules/
+**/node_modules/
+
+# 构建产物 (Vue/Vite 项目通常是 dist;Java 是 target)
+dist/
+**/dist/
+target/
+**/target/
+
+# 环境变量文件 (保护密钥不泄露;.env.example 不受影响,会正常提交)
+.env
+.env.local
+.env.production
+
+# Python (ai-service)
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# 运行时数据 (会话状态/用户上传,含隐私,不属于源码)
+*.db
+*.db-shm
+*.db-wal
+uploads/
+**/uploads/
+
+# 日志
+*.log
+
+# 本地工具状态 (WorkBuddy/Claude 会话与项目记忆,非项目源码)
+.workbuddy/
+.agents/
+.claude/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE 配置文件 (可选)
+.vscode/
+.idea/

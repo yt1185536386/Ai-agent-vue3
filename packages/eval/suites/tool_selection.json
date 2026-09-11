@@ -1,0 +1,28 @@
+[
+  {
+    "id": "weather-basic",
+    "input": "长沙今天天气怎么样",
+    "expect": ["get_weather"]
+  },
+  {
+    "id": "calc-basic",
+    "input": "帮我算一下 (3+5)*2 等于多少",
+    "expect": ["calculator"]
+  },
+  {
+    "id": "time-basic",
+    "input": "今天是星期几",
+    "expect": ["get_current_time"]
+  },
+  {
+    "id": "bus-basic",
+    "input": "长沙118路公交车经过哪些站",
+    "expect": ["query_bus_route"]
+  },
+  {
+    "id": "chitchat-no-tool",
+    "input": "你好,给我讲个笑话吧",
+    "expect": [],
+    "match": "exact"
+  }
+]

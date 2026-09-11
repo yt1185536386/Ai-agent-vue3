@@ -1,0 +1,19 @@
+fastapi==0.139.2
+httpx==0.28.1
+python-dotenv==1.2.2
+uvicorn==0.51.0
+aiomysql==0.3.2
+pymysql==1.2.0
+dashscope==1.26.6
+# Agent 编排核心(版本与 .venv 现状锁定;ns 过滤等子图行为依赖 1.2.9 实测)
+langgraph==1.2.9
+langgraph-checkpoint-sqlite==3.1.1
+langchain-core==1.5.0
+langchain-openai==1.4.0
+openai==2.46.0
+# 持久化
+sqlalchemy==2.0.51
+aiosqlite==0.22.1
+# 文档解析(RAG 上传)
+pypdf==6.14.2
+python-docx==1.2.0
