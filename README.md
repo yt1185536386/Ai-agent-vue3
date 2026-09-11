@@ -59,6 +59,10 @@ CREATE DATABASE ai_agent DEFAULT CHARACTER SET utf8mb4;
 ### 2. 启动各服务(建议顺序)
 
 ```bash
+# ⓪ RAG 向量检索(可选,需要 Docker)
+cd packages/rag-service
+docker compose up -d            # pgvector + init.sql;不启动则文档检索相关功能不可用
+
 # ① Java 模型网关(需要 JAVA_HOME 指向 JDK 21)
 cd packages/model-gateway
 GATEWAY_SERVICE_KEY=<与 NESTJS_SERVICE_KEY 同值> mvn spring-boot:run
@@ -80,6 +84,20 @@ npm install && npm run dev        # http://localhost:6012
 cd packages/ServerManegeUI
 npm install && npm run dev        # http://localhost:6013
 ```
+
+启动后自查(端口通即服务就绪):
+
+| 服务 | 端口 | 健康检查 |
+|---|---|---|
+| model-gateway | 6015 | `curl http://localhost:6015/health` |
+| ai-service | 6010 | `curl http://localhost:6010/docs`(Swagger) |
+| NestJS BFF | 6011 | `curl http://localhost:6011` |
+| 业务前端 | 6012 | 浏览器打开 |
+| 管理端 | 6013 | 浏览器打开 |
+| rag-service | 5432 | `docker compose ps` |
+
+运行日志会自动写入 MySQL 各服务独立表(`log_nestjs` / `log_ai_service` /
+`log_model_gateway`,见下文「运行日志落库」),排错时直接查表。
 
 ### 3. 首次配置
 

@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS {table} (
   context VARCHAR(100) NULL,
   message TEXT NOT NULL,
   meta JSON NULL,
-  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (id),
   KEY idx_level_created (level, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4

@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS log_nestjs (
   context VARCHAR(100) NULL,
   message TEXT NOT NULL,
   meta JSON NULL,
-  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (id),
   KEY idx_level_created (level, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='NestJS BFF 运行日志';
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS log_ai_service (
   context VARCHAR(100) NULL,
   message TEXT NOT NULL,
   meta JSON NULL,
-  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (id),
   KEY idx_level_created (level, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='ai-service Agent 运行日志';
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS log_model_gateway (
   context VARCHAR(100) NULL,
   message TEXT NOT NULL,
   meta JSON NULL,
-  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   PRIMARY KEY (id),
   KEY idx_level_created (level, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='model-gateway Java 网关运行日志';

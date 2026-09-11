@@ -38,7 +38,7 @@ public class MysqlLogAppender extends AppenderBase<ILoggingEvent> {
               context VARCHAR(100) NULL,
               message TEXT NOT NULL,
               meta JSON NULL,
-              created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+              created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
               PRIMARY KEY (id),
               KEY idx_level_created (level, created_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
@@ -79,7 +79,7 @@ public class MysqlLogAppender extends AppenderBase<ILoggingEvent> {
         String host = env.getOrDefault("DB_HOST", "localhost");
         String port = env.getOrDefault("DB_PORT", "3306");
         String db = env.getOrDefault("DB_DATABASE", "ai_agent");
-        return "jdbc:mysql://%s:%s/%s?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8mb4"
+        return "jdbc:mysql://%s:%s/%s?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8"
                 .formatted(host, port, db);
     }
 

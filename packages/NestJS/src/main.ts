@@ -18,6 +18,9 @@ async function bootstrap() {
   app.useBodyParser('json', { limit: '50mb' });
   app.useBodyParser('urlencoded', { limit: '50mb', extended: true });
 
+  // 运行日志落库:全局 logger 换成 DbLoggerService(控制台照常输出,另批量写 log_nestjs 表)
+  app.useLogger(app.get(DbLoggerService));
+
   // 全链路请求 ID:后续转发链路(NestJS → ai-service → model-gateway)按它关联日志
   app.use(requestIdMiddleware);
 

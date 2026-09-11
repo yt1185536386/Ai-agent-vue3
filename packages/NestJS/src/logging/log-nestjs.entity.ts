@@ -20,6 +20,7 @@ export class LogNestjsEntity {
   @Column({ type: 'json', nullable: true, comment: '结构化附加信息(requestId 等,预留)' })
   meta: Record<string, unknown> | null;
 
-  @CreateDateColumn({ type: 'datetime', precision: 3 })
+  // 列名对齐另外两张日志表(dblog.py/MysqlLogAppender 均写 created_at),便于统一查询
+  @CreateDateColumn({ type: 'datetime', precision: 6, name: 'created_at' })
   createdAt: Date;
 }
