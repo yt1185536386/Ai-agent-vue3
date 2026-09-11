@@ -76,6 +76,15 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 log = logging.getLogger(__name__)
 
+# root logger 默认 WARNING,不显式开启的话 INFO 级日志(控制台和落库)全被吞掉
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s %(levelname)s %(name)s - %(message)s")
+
+# MySQL 运行日志(写入 log_ai_service 表):DATABASE_URL 非 MySQL 时自动跳过,失败静默降级
+from app.dblog import attach_mysql_logging  # noqa: E402
+
+attach_mysql_logging()
+
 # 模型来源统一以 model-gateway channels 表为准(见 app/providers/registry.py),
 # PROVIDERS 为进程内缓存(15s TTL,原地刷新),环境变量仅作查库失败时的兜底
 

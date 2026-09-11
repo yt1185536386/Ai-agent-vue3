@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import * as path from 'path';
 import { config as dotenvConfig } from 'dotenv';
 import { AppModule } from './app.module';
+import { DbLoggerService } from './logging/db-logger.service';
 import { requestIdMiddleware } from './common/request-id.middleware';
 
 // 无论从哪个 cwd 启动,都读取 NestJS 目录下的 .env

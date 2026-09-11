@@ -14,6 +14,7 @@ import { ChatModule } from './chat/chat.module';
 import { FilesModule } from './files/files.module';
 import { ModelsModule } from './models/models.module';
 import { UsersModule } from './users/users.module';
+import { DbLoggerService } from './logging/db-logger.service';
 
 @Module({
   imports: [
@@ -46,6 +47,8 @@ import { UsersModule } from './users/users.module';
   controllers: [AppController],
   providers: [
     AppService,
+    // 全局运行日志:控制台输出 + 批量落库 log_nestjs(main.ts 里 app.useLogger 启用)
+    DbLoggerService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

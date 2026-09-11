@@ -88,6 +88,23 @@ npm install && npm run dev        # http://localhost:6013
 2. 业务前端登录后即可对话;上传文档走「文档管理」,Agent 会通过
    `search_docs` 工具自主检索
 
+## 运行日志落库(MySQL)
+
+三个后端服务的运行日志在控制台照常输出的同时,批量写入 MySQL(`ai_agent` 库)各自的表,
+结构同构:`level / context / message / meta / created_at`。
+
+| 服务 | 表 | 写入方实现 |
+|---|---|---|
+| NestJS BFF | `log_nestjs` | `DbLoggerService`(全局 logger,2s 攒批) |
+| ai-service | `log_ai_service` | `app/dblog.py`(pymysql + 守护线程,复用 `DATABASE_URL`) |
+| model-gateway | `log_model_gateway` | `MysqlLogAppender`(自定义 Logback Appender) |
+
+- 表均自动创建;生产环境(`DB_SYNCHRONIZE=false`)预建用 `packages/NestJS/sql/log_tables.sql`
+- 失败一律静默降级(只写 stderr):MySQL 不可用时行为与未改造前完全一致,绝不影响业务
+- Java 网关连接信息优先读 `LOG_DB_URL / LOG_DB_USERNAME / LOG_DB_PASSWORD`,未配置时
+  回退解析同仓库 `NestJS/.env` 的 `DB_*`
+- 常用查询:按时间段排错 `SELECT * FROM log_ai_service WHERE created_at > NOW() - INTERVAL 1 HOUR AND level IN ('error','warn') ORDER BY created_at DESC;`
+
 ## 架构文档
 
 - [双网关架构设计文档.md](./双网关架构设计文档.md) — NestJS/Java 网关职责、鉴权链路、安全基线
