@@ -63,9 +63,16 @@ CREATE DATABASE ai_agent DEFAULT CHARACTER SET utf8mb4;
 cd packages/rag-service
 docker compose up -d            # pgvector + init.sql;不启动则文档检索相关功能不可用
 
-# ① Java 模型网关(需要 JAVA_HOME 指向 JDK 21)
+# ① Java 模型网关 —— 必须用 mysql profile + 三把密钥,否则管理端 401、内部调用被拒
+#    推荐:根目录一键脚本(自动读 NestJS/.env 的 DB_*/JWT_SECRET/服务密钥)
+powershell -ExecutionPolicy Bypass -File run-mysql.ps1
+#    或手动(变量缺一不可: GATEWAY_SERVICE_KEY 与 NESTJS_SERVICE_KEY 同值;JWT_SECRET 同值;profile=mysql 共享用户库)
 cd packages/model-gateway
-GATEWAY_SERVICE_KEY=<与 NESTJS_SERVICE_KEY 同值> mvn spring-boot:run
+GATEWAY_SERVICE_KEY=<同 NESTJS_SERVICE_KEY> JWT_SECRET=<同 NestJS> \
+DB_USERNAME=... DB_PASSWORD=... \
+mvn spring-boot:run -Dspring-boot.run.profiles=mysql
+#    ⚠️ 裸 `java -jar`(默认 H2 内存库 + 无密钥)会导致:登录后接口全 401(网关查不到用户)、
+#       ai-service 调网关被默认拒绝(模型列表失败)
 
 # ② ai-service
 cd packages/ai-service
