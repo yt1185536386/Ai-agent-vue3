@@ -40,6 +40,11 @@ uploads/
 !README.md
 !**/README.md
 
+# TXT 文档 (个人笔记/作业不提交;requirements.txt 等依赖清单正常提交)
+*.txt
+!requirements.txt
+!**/requirements.txt
+
 # 系统文件
 .DS_Store
 Thumbs.db
