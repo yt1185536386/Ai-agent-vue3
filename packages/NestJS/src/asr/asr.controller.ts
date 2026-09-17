@@ -38,7 +38,7 @@ export class AsrController {
       });
     }
     const aiServiceUrl = (
-      this.config.get<string>('AI_SERVICE_URL') ?? 'http://localhost:6010'
+      this.config.get<string>('AI_SERVICE_URL') ?? 'http://localhost:26010'
     ).replace(/\/+$/, '');
     const serviceKey = this.config.get<string>('NESTJS_SERVICE_KEY');
     if (!serviceKey) {

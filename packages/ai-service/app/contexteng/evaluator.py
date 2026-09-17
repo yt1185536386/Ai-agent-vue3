@@ -64,7 +64,7 @@ async def run_retrieval_eval(
                 "expect_contains": c.expect_contains}
         try:
             embs = await embed_texts(provider, embed_model, [c.query])
-            hits = await search_chunks(session, user_id, embs[0], top_k=k)
+            hits = await search_chunks(session, user_id, embs[0], query=c.query, top_k=k)
             hits = [h for h in hits if h.get("score", 0) > th]
             details.append({**case, **_score_case(case, hits, k)})
         except Exception as e:

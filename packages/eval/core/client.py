@@ -5,7 +5,7 @@ eval 以 in-process 方式直接调用 ai-service 的 harness(不起 HTTP 服务
 - 用 ai-service/.venv 的 python 运行(依赖零新增);
 - ai-service/.env 已配置(模型网关密钥、DATABASE_URL)。
 
-用户权限类写操作走 NestJS HTTP,e2e 套件涉及此类用例时需 NestJS(6011)在线。
+用户权限类写操作走 NestJS HTTP,e2e 套件涉及此类用例时需 NestJS(26011)在线。
 """
 import os
 import sys

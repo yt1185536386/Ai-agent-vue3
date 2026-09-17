@@ -16,7 +16,7 @@ Vue 3 + TypeScript + Vite + Element Plus + ECharts + Pinia,对接 `../model-gate
 
 ```bash
 npm install
-npm run dev     # http://localhost:6013,/api 与 /v1 代理到 http://localhost:6012
+npm run dev     # http://localhost:26013,/api 与 /v1 代理到 http://localhost:26012
 npm run build   # 类型检查 + 产物构建
 ```
 

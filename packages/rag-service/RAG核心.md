@@ -1,13 +1,13 @@
 # RAG 核心流程文档
 
-> 适用代码：`packages/rag-service`（端口 6016）
+> 适用代码：`packages/rag-service`（端口 26016）
 > 本文档将 rag-service 的三大核心流程（知识库创建、文档入库、知识库问答）完整串联，说明每一步调用哪个模块、为什么需要、数据如何流转。
 
 ---
 
 ## 0. 系统定位与总览
 
-rag-service 是一个**最小可用的 RAG（检索增强生成）微服务**。它本身不运行任何模型，所有 Embedding 和对话能力都通过内网 `model-gateway`（端口 6015）的 OpenAI 兼容接口完成：
+rag-service 是一个**最小可用的 RAG（检索增强生成）微服务**。它本身不运行任何模型，所有 Embedding 和对话能力都通过内网 `model-gateway`（端口 26015）的 OpenAI 兼容接口完成：
 
 - `POST /v1/embeddings` —— 文本转向量
 - `POST /v1/chat/completions` —— 大模型对话
@@ -19,7 +19,7 @@ rag-service 是一个**最小可用的 RAG（检索增强生成）微服务**。
 用户/前端 (携带 JWT)
     │  /api/rag/**
     ▼
-┌────────────────── rag-service (6016) ──────────────────┐
+┌────────────────── rag-service (26016) ──────────────────┐
 │                                                        │
 │  auth   模块 ──→ 校验 JWT + 回库校验用户状态            │
 │  kb     模块 ──→ 知识库 CRUD（knowledge_bases 表）      │
@@ -30,7 +30,7 @@ rag-service 是一个**最小可用的 RAG（检索增强生成）微服务**。
 └──────────────────────┬─────────────────────────────────┘
                        │ HTTP（service-key 鉴权 + X-User-Id 计量透传）
                        ▼
-               model-gateway (6015)
+               model-gateway (26015)
                        │
                        ▼
               真实的 LLM / Embedding 供应商

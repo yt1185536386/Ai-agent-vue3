@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -30,8 +31,28 @@ public class AuthInterceptor implements HandlerInterceptor {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /** 内部服务密钥：ai-service 等携带 X-Service-Key 代替 Bearer JWT 调用（服务间调用）。 */
+    @Value("${rag.service-key.value:}")
+    private String serviceKey;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+        // 内部服务调用鉴权：X-Service-Key 匹配则放行，用户身份由 X-User-Id / X-Username 头透传。
+        String serviceKeyHeader = request.getHeader("X-Service-Key");
+        if (serviceKey != null && !serviceKey.isBlank()
+                && serviceKey.equals(serviceKeyHeader)) {
+            String userId = request.getHeader("X-User-Id");
+            String username = request.getHeader("X-Username");
+            if (userId == null || userId.isBlank()) {
+                userId = "system";
+            }
+            if (username == null || username.isBlank()) {
+                username = userId;
+            }
+            AuthContext.set(new CurrentUser(userId, username));
+            return true;
+        }
+
         String header = request.getHeader("Authorization");
         String token = (header != null && header.startsWith("Bearer ")) ? header.substring(7) : null;
 

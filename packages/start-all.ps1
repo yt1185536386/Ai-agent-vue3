@@ -1,7 +1,7 @@
 $base = 'D:\selfFile\python\vue3\v3agent\packages'
 
 Start-Process -FilePath "$base\ai-service\.venv\Scripts\python.exe" `
-  -ArgumentList '-m','uvicorn','app.main:app','--reload','--host','127.0.0.1','--port','6010' `
+  -ArgumentList '-m','uvicorn','app.main:app','--reload','--host','127.0.0.1','--port','26010' `
   -WorkingDirectory "$base\ai-service" `
   -RedirectStandardOutput "$base\ai-service\dev-out.log" `
   -RedirectStandardError  "$base\ai-service\dev-err.log" `

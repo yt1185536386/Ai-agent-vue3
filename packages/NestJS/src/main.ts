@@ -34,13 +34,13 @@ async function bootstrap() {
     origin:
       corsOrigins.length > 0
         ? corsOrigins
-        : ['http://localhost:6012', 'http://localhost:6013'],
+        : ['http://localhost:26012', 'http://localhost:26013'],
     credentials: true,
   });
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   // 优雅停机:收到 SIGTERM 后停止接新请求,存量请求处理完再退出
   app.enableShutdownHooks();
-  await app.listen(process.env.PORT ?? 6011);
+  await app.listen(process.env.PORT ?? 26011);
 }
 bootstrap();

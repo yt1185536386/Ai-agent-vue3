@@ -31,7 +31,7 @@ export class ConversationsController {
 
   private baseUrl(): string {
     return (
-      this.config.get<string>('AI_SERVICE_URL') ?? 'http://localhost:6010'
+      this.config.get<string>('AI_SERVICE_URL') ?? 'http://localhost:26010'
     ).replace(/\/+$/, '');
   }
 

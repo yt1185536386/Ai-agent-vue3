@@ -16,7 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
     private final AuthInterceptor authInterceptor;
     private final ServiceKeyInterceptor serviceKeyInterceptor;
 
-    @Value("${gateway.cors.allowed-origins:http://localhost:6012,http://localhost:6013}")
+    @Value("${gateway.cors.allowed-origins:http://localhost:26012,http://localhost:26013}")
     private String allowedOrigins;
 
     @Override
@@ -38,7 +38,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .filter(s -> !s.isEmpty())
                 .toArray(String[]::new);
         registry.addMapping("/**")
-                .allowedOriginPatterns(origins.length > 0 ? origins : new String[]{"http://localhost:6012", "http://localhost:6013"})
+                .allowedOriginPatterns(origins.length > 0 ? origins : new String[]{"http://localhost:26012", "http://localhost:26013"})
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true);

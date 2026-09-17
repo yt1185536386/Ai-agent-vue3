@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   Post,
   Put,
   Req,
@@ -21,6 +22,8 @@ import { ChatService } from './chat.service';
 @Controller('v1')
 @UseGuards(JwtAuthGuard)
 export class ChatController {
+  private readonly logger = new Logger(ChatController.name);
+
   constructor(private readonly chatService: ChatService) {}
 
   /** 从 JWT 载荷中取用户 id(所有用户态接口共用) */
@@ -127,7 +130,19 @@ export class ChatController {
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
       res.flushHeaders();
-      Readable.fromWeb(upstream.body as any).pipe(res);
+      // 关键:必须给流挂 error 处理 —— 上游(ai-service)重启/断流时,
+      // Readable 未捕获的 'error' 事件会打挂整个 Node 进程;
+      // 这里降级为结束本次响应,客户端表现为流提前终止
+      const stream = Readable.fromWeb(upstream.body as any);
+      stream.on('error', (err) => {
+        this.logger.warn(`SSE 上游流中断,提前结束响应: ${String(err)}`);
+        if (!res.writableEnded) {
+          res.end();
+        }
+      });
+      // 客户端主动断开时取消上游流,避免悬挂的 fetch 连接
+      res.on('close', () => stream.destroy());
+      stream.pipe(res);
       return;
     }
 

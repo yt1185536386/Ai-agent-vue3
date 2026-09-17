@@ -1,5 +1,37 @@
-# 启动 v3agent 全部常驻服务（分离进程，避免 Bash 后台任务被每 turn 杀掉）
+﻿# 启动 v3agent 全部常驻服务（分离进程，避免 Bash 后台任务被每 turn 杀掉）
 $root = 'D:\selfFile\python\vue3\v3agent\packages'
+
+# ========== 0. 清理残留进程（治本：防止 watch 僵尸进程抢端口） ==========
+# 历史教训：只杀监听端口的子进程会让 nest --watch / uvicorn --reload 的
+# 父进程存活并自动重拉实例，新旧互抢导致 EADDRINUSE 死循环。
+$ports = @(26010, 26011, 26012, 26013, 26015, 26016)
+
+# 0a. 杀掉当前占用这些端口的进程树
+foreach ($p in $ports) {
+    $conns = Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue
+    foreach ($c in $conns) {
+        Write-Host "清理端口 $p 占用进程 PID=$($c.OwningProcess)"
+        & taskkill /PID $c.OwningProcess /T /F | Out-Null
+    }
+}
+
+# 0b. 杀掉本项目残留的 node(nest --watch / vite / npm 子进程)、
+#     python(uvicorn --reload 父进程)、java(spring-boot:run)
+$patterns = @(
+    @{ Name = 'node';   Like = '*v3agent*packages*' },
+    @{ Name = 'python'; Like = '*uvicorn*app.main*' },
+    @{ Name = 'java';   Like = '*v3agent*' },
+    @{ Name = 'cmd';    Like = '*spring-boot:run*' }
+)
+foreach ($pat in $patterns) {
+    Get-CimInstance Win32_Process -Filter "Name='$($pat.Name).exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -like $pat.Like } |
+        ForEach-Object {
+            Write-Host "清理残留进程 $($pat.Name).exe PID=$($_.ProcessId)"
+            & taskkill /PID $_.ProcessId /T /F | Out-Null
+        }
+}
+Start-Sleep -Seconds 2
 
 function Read-EnvFile($path) {
     $vars = @{}
@@ -41,18 +73,18 @@ $modelName = $nestEnv['MODEL_NAME']
 
 $mvn = 'D:\maven\apache-maven-3.9.16\bin\mvn.cmd'
 
-# 1. ai-service (6010)
+# 1. ai-service (26010)
 Start-ServiceProcess 'ai-service' (Join-Path $root 'ai-service') 'powershell' @(
-    '-Command', '& .\.venv\Scripts\activate; python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 6010'
+    '-Command', '& .\.venv\Scripts\activate; python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 26010'
 )
 
-# 2. NestJS (6011)
+# 2. NestJS (26011)
 Start-ServiceProcess 'NestJS' (Join-Path $root 'NestJS') 'cmd' @('/c', 'npm run start:dev')
 
-# 3. my-vue-app-ts (6012)
+# 3. my-vue-app-ts (26012)
 Start-ServiceProcess 'my-vue-app-ts' (Join-Path $root 'my-vue-app-ts') 'cmd' @('/c', 'npm run dev')
 
-# 4. ServerManegeUI (6013)
+# 4. ServerManegeUI (26013)
 Start-ServiceProcess 'ServerManegeUI' (Join-Path $root 'ServerManegeUI') 'cmd' @('/c', 'npm run dev')
 
 $mg = Join-Path $root 'model-gateway'
@@ -77,7 +109,7 @@ Start-ServiceProcess 'model-gateway' $mg $mvn @(
     "-Dspring-boot.run.jvmArguments=-Dgateway.jwt.secret=$jwtSecret -Dgateway.service-key=$serviceKey"
 )
 
-# 6. rag-service (6016)
+# 6. rag-service (26016)
 $rag = Join-Path $root 'rag-service'
 Start-ServiceProcess 'rag-service' $rag $mvn @(
     '-Dmaven.repo.local=D:\maven\repository',
@@ -87,23 +119,23 @@ Start-ServiceProcess 'rag-service' $rag $mvn @(
 
 Write-Host ''
 Write-Host '等待 Java 服务就绪...'
-if (-not (Wait-Port -Port 6015 -TimeoutSeconds 240)) {
-    Write-Warning 'model-gateway (6015) 未在 240 秒内就绪，请检查 D:\selfFile\python\vue3\v3agent\packages\model-gateway\dev-err.log'
+if (-not (Wait-Port -Port 26015 -TimeoutSeconds 240)) {
+    Write-Warning 'model-gateway (26015) 未在 240 秒内就绪，请检查 D:\selfFile\python\vue3\v3agent\packages\model-gateway\dev-err.log'
 } else {
-    Write-Host 'model-gateway (6015) 已就绪'
+    Write-Host 'model-gateway (26015) 已就绪'
 }
 
-if (-not (Wait-Port -Port 6016 -TimeoutSeconds 240)) {
-    Write-Warning 'rag-service (6016) 未在 240 秒内就绪，请检查 D:\selfFile\python\vue3\v3agent\packages\rag-service\dev-err.log'
+if (-not (Wait-Port -Port 26016 -TimeoutSeconds 240)) {
+    Write-Warning 'rag-service (26016) 未在 240 秒内就绪，请检查 D:\selfFile\python\vue3\v3agent\packages\rag-service\dev-err.log'
 } else {
-    Write-Host 'rag-service (6016) 已就绪'
+    Write-Host 'rag-service (26016) 已就绪'
 }
 
 Write-Host ''
 Write-Host '全部服务已分离启动，请等待 10-20 秒后访问:'
-Write-Host '  业务端 http://localhost:6012'
-Write-Host '  管理端 http://localhost:6013'
-Write-Host '  NestJS  http://localhost:6011'
-Write-Host '  ai-service http://localhost:6010'
-Write-Host '  model-gateway http://localhost:6015'
-Write-Host '  rag-service http://localhost:6016'
+Write-Host '  业务端 http://localhost:26012'
+Write-Host '  管理端 http://localhost:26013'
+Write-Host '  NestJS  http://localhost:26011'
+Write-Host '  ai-service http://localhost:26010'
+Write-Host '  model-gateway http://localhost:26015'
+Write-Host '  rag-service http://localhost:26016'

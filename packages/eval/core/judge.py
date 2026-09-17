@@ -29,7 +29,7 @@ _JUDGE_PROMPT = """你是一个严格的 AI 回答质量评审。请根据「评
 async def judge_answer(provider: dict, judge_model: str,
                        question: str, rubric: str, answer: str) -> dict:
     """返回 {"score": int, "reason": str};解析失败时 score=0 并带原始输出"""
-    from app.harness import build_chat
+    from app.agent import build_chat
     chat = build_chat(provider, judge_model, {})
     prompt = _JUDGE_PROMPT.format(question=question, rubric=rubric, answer=answer)
     resp = await chat.ainvoke([HumanMessage(content=prompt)])

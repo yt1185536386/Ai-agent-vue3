@@ -207,7 +207,7 @@ async def run_retrieval(cases: list[dict], provider_key: str, *,
             try:
                 embs = await embed_texts(provider, embed_model, [c["query"]])
                 hits = await search_chunks(s, c.get("user_id") or user_id,
-                                           embs[0], top_k=k)
+                                           embs[0], query=c["query"], top_k=k)
                 hits = [h for h in hits if h.get("score", 0) > th]
                 scored = _score_case(
                     {"expect_doc_ids": json.dumps(c.get("expect_doc_ids", [])),
@@ -254,7 +254,7 @@ async def run_regression(cases: list[dict], provider_key: str, model: str,
 
     走直答路径(build_chat + 时间注入,与线上 preprocess 一致),
     用于改动系统提示词或切换模型后的防退化对比。"""
-    from app.harness import build_chat, preprocess, to_lc_message
+    from app.agent import build_chat, preprocess, to_lc_message
     provider = providers()[provider_key]
     judge_provider = providers()[judge_provider_key]
     results = []

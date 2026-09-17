@@ -27,7 +27,7 @@ import os
 import time
 
 import aiosqlite
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import SystemMessage, ToolMessage
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
@@ -101,6 +101,32 @@ async def get_checkpointer() -> AsyncSqliteSaver:
     return _checkpointer
 
 
+def _repair_dangling_tool_calls(msgs: list) -> list:
+    """修复悬空 tool_calls(纯函数,不改 checkpoint,只修发给模型的副本)。
+
+    工具节点崩溃(如 embedding 配额耗尽)会把带 tool_calls 的 AIMessage
+    残留在 checkpoint 尾部而没有对应 ToolMessage,之后每轮都被上游
+    400 拒绝(insufficient tool messages),整个会话废掉。
+    这里为缺失应答的 tool_call 补占位 ToolMessage(紧贴其 AIMessage,
+    保持 OpenAI 要求的相邻顺序),老会话下一轮即自愈。"""
+    out = list(msgs)
+    for i, m in enumerate(out):
+        tcs = getattr(m, "tool_calls", None) or []
+        if not tcs:
+            continue
+        answered = {t.tool_call_id for t in out[i + 1:] if t.type == "tool"}
+        missing = [tc["id"] for tc in tcs if tc.get("id") not in answered]
+        if missing:
+            out[i + 1:i + 1] = [
+                ToolMessage(
+                    content="(该工具调用因服务中断未返回结果,请基于已有信息回答或建议用户重试)",
+                    tool_call_id=tid,
+                )
+                for tid in missing
+            ]
+    return out
+
+
 def make_agent(chat, tools, checkpointer=None, guardrail=None, state_schema=None):
     """手写 ReAct 循环;想对比 prebuilt 行为时,
     换用 create_react_agent(chat, tools, checkpointer=...) 即可。
@@ -116,7 +142,8 @@ def make_agent(chat, tools, checkpointer=None, guardrail=None, state_schema=None
         """模型决策节点:把目前累积的全部消息发给模型,返回模型的回复(增量)。
         系统提示(时间+业务规则)只在调用时前置,不写入图状态。
         调用完成后回调 context 快照观测器(失败静默,绝不影响主链路)。"""
-        msgs = [SystemMessage(content=agent_system_prompt()), *state["messages"]]
+        msgs = [SystemMessage(content=agent_system_prompt()),
+                *_repair_dangling_tool_calls(state["messages"])]
         t0 = time.perf_counter()
         resp = await chat_with_tools.ainvoke(msgs) # 异步调用模型
         if _CONTEXT_OBSERVER:

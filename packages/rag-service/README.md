@@ -43,7 +43,7 @@ mvn spring-boot:run
 2. 创建知识库
 
 ```bash
-curl -X POST http://localhost:6016/api/rag/kbs \
+curl -X POST http://localhost:26016/api/rag/kbs \
   -H "Authorization: Bearer <JWT>" \
   -H "Content-Type: application/json" \
   -d '{"name":"产品手册","description":"公司产品的 PDF 手册"}'
@@ -52,7 +52,7 @@ curl -X POST http://localhost:6016/api/rag/kbs \
 3. 上传 PDF
 
 ```bash
-curl -X POST "http://localhost:6016/api/rag/kbs/<kbId>/documents" \
+curl -X POST "http://localhost:26016/api/rag/kbs/<kbId>/documents" \
   -H "Authorization: Bearer <JWT>" \
   -F "file=@manual.pdf"
 ```
@@ -60,7 +60,7 @@ curl -X POST "http://localhost:6016/api/rag/kbs/<kbId>/documents" \
 4. 问答
 
 ```bash
-curl -X POST "http://localhost:6016/api/rag/kbs/<kbId>/chat" \
+curl -X POST "http://localhost:26016/api/rag/kbs/<kbId>/chat" \
   -H "Authorization: Bearer <JWT>" \
   -H "Content-Type: application/json" \
   -d '{"question":"这款产品支持哪些模型？"}'
@@ -70,10 +70,10 @@ curl -X POST "http://localhost:6016/api/rag/kbs/<kbId>/chat" \
 
 | 配置项 | 默认值 | 说明 |
 |--------|--------|------|
-| `server.port` | 6016 | 服务端口 |
+| `server.port` | 26016 | 服务端口 |
 | `spring.datasource.url` | `jdbc:postgresql://localhost:5433/rag_db` | PostgreSQL 地址 |
 | `rag.jwt.secret` | 与 gateway 同默认值 | JWT 共享密钥 |
-| `rag.gateway.base-url` | `http://localhost:6015` | model-gateway 地址 |
+| `rag.gateway.base-url` | `http://localhost:26015` | model-gateway 地址 |
 | `rag.gateway.service-key` | 空 | 内部服务密钥 |
 | `rag.model.embedding-model` | `text-embedding-3-small` | embedding 模型 |
 | `rag.model.chat-model` | `gpt-4o-mini` | 对话模型 |

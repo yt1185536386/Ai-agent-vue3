@@ -8,7 +8,7 @@
 
 ```
 ① 前端发消息          my-vue-app-ts  AgentMode/mixin.ts  runAgent()
-② Vite 代理           /api → localhost:6011
+② Vite 代理           /api → localhost:26011
 ③ NestJS 网关         chat.controller.ts:JWT 鉴权 → 注入内部头转发
 ④ ai-service 入口     main.py:preprocess() → 分流(Agent / 直答)→ 用户消息落库
 ⑤ 守门子图+ReAct 循环 guardrail 子图(越权拦截)→ loop.py:决策 ⇄ 工具,可中断审批
@@ -54,7 +54,7 @@ await streamChat(conv, assistantMsg, {
 
 **文件**:`my-vue-app-ts/vite.config.ts`
 
-`/api` 前缀代理到 `http://localhost:6011`(`NESTJS_PORT`),开发环境免去跨域。
+`/api` 前缀代理到 `http://localhost:26011`(`NESTJS_PORT`),开发环境免去跨域。
 SSE 流式响应经 http-proxy 默认逐 chunk 透传,不缓冲。
 
 ## ③ NestJS 网关

@@ -1,5 +1,5 @@
 server:
-  port: ${PORT:6016}
+  port: ${PORT:26016}
 
 spring:
   application:
@@ -24,12 +24,15 @@ spring:
     default-property-inclusion: non_null
 
 rag:
+  service-key:
+    # 内部服务密钥（ai-service 等调用 /api/rag/search 时用 X-Service-Key 校验，代替 Bearer JWT）
+    value: ${RAG_SERVICE_KEY:}
   jwt:
     # 与 model-gateway / NestJS 网关共享的 JWT 秘密（只校验不签发）
     secret: ${JWT_SECRET:model-gateway-dev-secret-key-please-change-in-prod}
   gateway:
     # 模型网关地址（rag-service 通过它调用 /v1/embeddings 和 /v1/chat/completions）
-    base-url: ${GATEWAY_BASE_URL:http://localhost:6015}
+    base-url: ${GATEWAY_BASE_URL:http://localhost:26015}
     # 与 model-gateway 的 gateway.service-key 同值，用于内部服务鉴权
     service-key: ${GATEWAY_SERVICE_KEY:}
   model:

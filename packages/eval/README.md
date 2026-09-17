@@ -38,7 +38,7 @@ cd packages/eval
 ## 前置条件
 
 - `ai-service/.env` 已配置(模型网关密钥、DATABASE_URL)
-- 涉及用户权限**写操作**的 e2e 用例需要 NestJS(6011)在线
+- 涉及用户权限**写操作**的 e2e 用例需要 NestJS(26011)在线
 - 涉及真实仓库数据的用例需要 MySQL 里有对应物料
 
 ## 四个套件与用例格式
@@ -120,7 +120,7 @@ Recall@K / Precision@K / 零结果率——切分/相似度调优的裁判指标
 跑完默认把离线指标上板(retrieval → `cx_metrics_daily`,regression/quality
 → `pe_metrics_daily`,按模板当前版本归因),管理台「Context 监控」页可直接看到
 Recall@K / Precision@K 趋势线;`--no-upload` 关闭。默认 in-process 直写;
-设 `EVAL_REPORT_URL=http://localhost:6010` 时改走 HTTP POST `/v1/cx/metrics/report`。
+设 `EVAL_REPORT_URL=http://localhost:26010` 时改走 HTTP POST `/v1/cx/metrics/report`。
 
 ## 结构
 

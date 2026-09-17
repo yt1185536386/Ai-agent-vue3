@@ -169,9 +169,11 @@ async def chat_completions(
     # 由 Agent 通过 search_docs 工具自主决定是否检索用户文档
     body = preprocess(body, provider) # 预处理请求体
 
-    # 带 tools 或显式 use_agent 的请求走服务端 Agent(工具调用循环在 AI 服务层完成);
-    # 来源不支持 tool_calls 时自动回落直答,前端可以无脑默认开 Agent
-    if (body.get("tools") or body.get("use_agent")) and provider.get("supports_tools"): # 是否支持工具调用
+    # 进入服务端 Agent(工具循环)只由前端开关决定:
+    # 请求带 tools 或显式 use_agent 就进 Agent;否则全程直答(大模型自己回答)。
+    # 不再受渠道 supportsTools 配置门控(原:渠道未开启 tool_calls 时,
+    # 即使前端开了开关也会回落直答,工具形同虚设)。
+    if body.get("tools") or body.get("use_agent"): # 是否显式要求 Agent
         return await run_agent(request, provider, body, user_id) # 走服务端 Agent
 
     return await forward_upstream(request, provider, body, user_id) # 转发到上游模型
@@ -231,7 +233,8 @@ async def run_agent(request: Request, provider: dict, body: dict, user_id: str):
     conv_id = body.get("conversation_id") # 会话 id;缺失 = adhoc 模式(不落库)
     thread_id = conv_id or f"adhoc-{os.urandom(8).hex()}" # 确定档案编号,这次对话用哪个档案夹？
     config = {"configurable": {"thread_id": thread_id}} # 把编号装进 LangGraph 要求的格式
-    decision = (body.get("resume") or {}).get("decision") # 判断这次请求是不是"审批恢复"
+    resume_payload = body.get("resume") or {}
+    decision = resume_payload.get("decision") # 判断这次请求是不是"审批恢复"
     if decision:
         # 恢复:把审批决策发给每个挂起的 interrupt(多个并行写工具时逐个送达)
         state = await agent.aget_state(config) # 获取状态
@@ -243,7 +246,10 @@ async def run_agent(request: Request, provider: dict, body: dict, user_id: str):
         if not ids:
             return openai_error("没有待审批的操作(断点不存在或已完成)", 400)
         # 审批恢复:不读 messages,拿钥匙开柜,从断点继续执行
-        graph_input = Command(resume={i: decision for i in ids})
+        # 当 resume 是 dict 时,把整个 dict 作为 resume 值(支持交互式审批传 jobLevelId/reason);
+        # 只有字符串 decision 时保持旧行为(单值 resume)
+        resume_value = resume_payload if isinstance(resume_payload, dict) else decision
+        graph_input = Command(resume={i: resume_value for i in ids})
     else:
         incoming = [to_lc_message(m) for m in body.get("messages", [])] # 转换为 LC 格式
         # 时间/仓库规则的系统提示由 agent_node 调用模型时现注入,
@@ -638,7 +644,7 @@ async def rag_search(
     provider = PROVIDERS.get(os.getenv("EMBED_PROVIDER", "bailian"))
     embed_model = os.getenv("EMBED_MODEL", "text-embedding-v3")
     embs = await embed_texts(provider, embed_model, [query])
-    results = await search_chunks(session, user_id, embs[0], top_k=body.get("top_k", 5))
+    results = await search_chunks(session, user_id, embs[0], query=query, top_k=body.get("top_k", 5))
     return {"results": results}
 
 

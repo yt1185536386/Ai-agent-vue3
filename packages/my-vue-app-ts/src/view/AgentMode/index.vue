@@ -512,7 +512,73 @@
                     {{ item.value?.detail }}
                   </li>
                 </ul>
-                <div class="approval-actions">
+
+                <!-- 交互式审批:职级选择 + 理由填写(仅当 item.value.jobLevels 存在) -->
+                <div
+                  v-for="(item, ii) in msg.approval.items"
+                  v-if="item.value?.jobLevels?.length"
+                  :key="'form-' + ii"
+                  class="approval-form"
+                >
+                  <div class="form-row">
+                    <label class="form-label">目标职级</label>
+                    <select
+                      class="form-select"
+                      :value="approvalSelections.get(item.id)?.jobLevelId ?? item.value?.jobLevelId ?? ''"
+                      @change="(e) => {
+                        const v = Number(e.target.value) || null;
+                        approvalSelections.set(item.id, {
+                          ...(approvalSelections.get(item.id) || {}),
+                          jobLevelId: v,
+                        });
+                      }"
+                    >
+                      <option value="" disabled>请选择职级</option>
+                      <option
+                        v-for="jl in item.value.jobLevels"
+                        :key="jl.id"
+                        :value="jl.id"
+                      >
+                        {{ jl.name }}(rank {{ jl.rank }})
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-row">
+                    <label class="form-label">调整理由</label>
+                    <textarea
+                      class="form-textarea"
+                      rows="2"
+                      placeholder="请填写调整理由(可选)"
+                      :value="approvalSelections.get(item.id)?.reason ?? ''"
+                      @input="(e) => {
+                        approvalSelections.set(item.id, {
+                          ...(approvalSelections.get(item.id) || {}),
+                          reason: e.target.value,
+                        });
+                      }"
+                    />
+                  </div>
+                  <div class="approval-actions">
+                    <button
+                      class="ap-approve"
+                      @click="submitApprovalWithOptions(msg, item, 'approve')"
+                    >
+                      确认调整
+                    </button>
+                    <button
+                      class="ap-reject"
+                      @click="submitApprovalWithOptions(msg, item, 'reject')"
+                    >
+                      拒绝
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 简单审批:无交互字段时保持原样 -->
+                <div
+                  v-if="!msg.approval.items.some((i) => i.value?.jobLevels?.length)"
+                  class="approval-actions"
+                >
                   <button class="ap-approve" @click="submitApproval(msg, 'approve')">
                     批准执行
                   </button>
@@ -2144,6 +2210,42 @@
   color: #d93026;
   cursor: pointer;
   font-size: 13px;
+}
+.approval-form {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  background: #fff;
+}
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.form-label {
+  width: 72px;
+  font-size: 13px;
+  color: #606266;
+  flex-shrink: 0;
+}
+.form-select {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+}
+.form-textarea {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  font-size: 13px;
+  resize: vertical;
+  font-family: inherit;
 }
 .asset-panel {
   width: 100%;

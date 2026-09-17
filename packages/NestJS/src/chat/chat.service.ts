@@ -317,7 +317,7 @@ export class ChatService {
     const userModel = await this.getUserModel(userId);
     const stream = body.stream === true;
     const aiServiceUrl = (
-      this.config.get<string>('AI_SERVICE_URL') ?? 'http://localhost:6010'
+      this.config.get<string>('AI_SERVICE_URL') ?? 'http://localhost:26010'
     ).replace(/\/+$/, '');
     const target = `${aiServiceUrl}/v1/chat/completions`;
 

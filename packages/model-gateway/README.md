@@ -6,13 +6,13 @@
 ## 在系统中的位置(2026-08 重构)
 
 ```
-浏览器 → NestJS 网关 (6011,唯一用户权限权威: JWT 签发/权限点/规则引擎)
+浏览器 → NestJS 网关 (26011,唯一用户权限权威: JWT 签发/权限点/规则引擎)
            │  X-Service-Key + X-User-Id + X-Username
            ▼
-        ai-service (6010,Agent 编排)
+        ai-service (26010,Agent 编排)
            │  Authorization: Bearer <service-key> + X-Channel-Key + X-User-Id
            ▼
-        model-gateway (6015,本服务,唯一模型出口)
+        model-gateway (26015,本服务,唯一模型出口)
            ▼
         company / 百炼 真实上游(真实 baseUrl/apiKey 只配置在 channels 表)
 ```
@@ -46,7 +46,7 @@ powershell -File run-mysql.ps1
 
 `run-mysql.ps1` 从 `../NestJS/.env` 读取 DB / JWT_SECRET / NESTJS_SERVICE_KEY,
 渠道表为空时按脚本内 `CHANNEL_*` 变量播种 company / bailian 真实渠道。
-端口 `6015`。
+端口 `26015`。
 
 > 注意:`Get-Content` 必须带 `-Encoding UTF8`(PowerShell 5.1 默认按 GBK 读
 > 无 BOM 的 UTF-8,中文注释行会吞掉换行导致后续 KEY 解析丢失)。
@@ -74,5 +74,5 @@ GET  /api/stats/overview               数据看板聚合(仅超级管理员)
 GET  /api/stats/realtime               最近一分钟实时指标(仅超级管理员)
 ```
 
-业务方接入:把 OpenAI SDK 的 `baseURL` 指向 `http://<gateway>:6015/v1`,
+业务方接入:把 OpenAI SDK 的 `baseURL` 指向 `http://<gateway>:26015/v1`,
 `apiKey` 用内部服务密钥;可选 `X-Channel-Key` 头指定渠道,否则按模型名匹配渠道。

@@ -913,6 +913,38 @@ export function useAgentMixin(auth) {
     });
   };
 
+  // HITL 交互式审批:审批卡片里的职级选择与理由填写状态
+  // key 用 msg.approval.items[0].id(interrupt id),value 存 {jobLevelId, reason}
+  const approvalSelections = ref(new Map());
+
+  // 提交带选项的审批(职级调整):把用户选择的职级 id 和理由一起塞进 resume
+  const submitApprovalWithOptions = async (msg, item, decision: "approve" | "reject") => {
+    if (isLoading.value) return;
+    const conv = activeConv.value;
+    msg.approval = null;
+    conv.messages.push({ role: "assistant", content: "", loading: true });
+    const assistantMsg = conv.messages[conv.messages.length - 1];
+    scrollToBottom(true);
+
+    const sel = approvalSelections.value.get(item.id) || {};
+    const resume: Record<string, unknown> = { decision };
+    if (decision === "approve") {
+      resume.jobLevelId = sel.jobLevelId || null;
+      resume.reason = sel.reason || "";
+    }
+    // 提交后清理本地选择状态,避免内存泄漏
+    approvalSelections.value.delete(item.id);
+
+    await streamChat(conv, assistantMsg, {
+      model: currentModel.value,
+      messages: [],
+      stream: true,
+      use_agent: true,
+      conversation_id: conv.id,
+      resume,
+    });
+  };
+
   // 终止当前正在进行的回答;终止后 isLoading 复位,可再次发送
   const stopAgent = () => {
     abortController?.abort();
@@ -1082,6 +1114,8 @@ export function useAgentMixin(auth) {
     toolStepSummary,
     toolArgsSummary,
     submitApproval,
+    submitApprovalWithOptions,
+    approvalSelections,
     navItems,
     navOpen,
     navActiveIndex,

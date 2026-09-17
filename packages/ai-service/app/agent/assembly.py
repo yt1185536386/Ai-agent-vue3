@@ -9,7 +9,13 @@ Agent = 基础工具 + (有 embed 配置时)RAG 检索工具。
 """
 from app.agent.client import build_chat
 from app.agent.loop import make_agent
-from app.tools import BASE_TOOLS, build_rag_tool
+from app.tools import (
+    BASE_TOOLS,
+    build_external_kb_tool,
+    build_query_team_members_tool,
+    build_rag_tool,
+    build_team_member_tool,
+)
 
 
 def build_agent(
@@ -33,6 +39,18 @@ def build_agent(
     if user_id and embed_provider and embed_provider.get("base_url"): # 如果有嵌入配置
         tools.append(build_rag_tool(user_id, embed_provider, embed_model)) # 添加 RAG 工具
     # 普通提问:不添加 RAG 工具
+    # 外部知识库工具:仅当配置了 rag-service 地址时挂载(把一个独立知识库挂载进来,Agent 按场景触发)
+    import os
+    if user_id and os.getenv("RAG_SERVICE_BASE_URL"):
+        tools.append(build_external_kb_tool(user_id))
+
+    # HITL 写工具:配置了 NestJS 业务地址与内部密钥时挂载"调整团队成员职级"。
+    # 该工具在内部 interrupt 挂起走人工审批,审批通过后调 NestJS users 接口落库。
+    if user_id and os.getenv("NESTJS_SERVICE_BASE_URL") and os.getenv("NESTJS_SERVICE_KEY"):
+        # 只读查询:查可见团队成员(供模型回答"我的团队成员/某部门成员")
+        tools.append(build_query_team_members_tool(user_id))
+        # 写操作:调整成员职级(人工审批后执行)
+        tools.append(build_team_member_tool(user_id))
 
     return make_agent(build_chat(provider, model, body), tools, checkpointer)
 

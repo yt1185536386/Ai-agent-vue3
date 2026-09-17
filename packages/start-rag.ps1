@@ -1,4 +1,4 @@
-# Start model-gateway + rag-service with in-memory vector store
+﻿# Start model-gateway + rag-service with in-memory vector store
 # No Docker/PostgreSQL required
 
 $ErrorActionPreference = "Stop"
@@ -30,32 +30,32 @@ function Wait-Port {
     return $false
 }
 
-Write-Host "Starting model-gateway on port 6015..."
+Write-Host "Starting model-gateway on port 26015..."
 Start-Process -FilePath $mvn `
     -ArgumentList "spring-boot:run", "-Dspring-boot.run.jvmArguments=-DGATEWAY_SERVICE_KEY=$env:GATEWAY_SERVICE_KEY -DJWT_SECRET=$env:JWT_SECRET" `
     -WorkingDirectory $modelGatewayDir `
     -WindowStyle Hidden
 
-if (-not (Wait-Port -Port 6015 -TimeoutSeconds 180)) {
+if (-not (Wait-Port -Port 26015 -TimeoutSeconds 180)) {
     Write-Error "model-gateway failed to start within 180 seconds"
 }
 Write-Host "model-gateway is ready"
 
-Write-Host "Starting rag-service on port 6016..."
+Write-Host "Starting rag-service on port 26016..."
 Start-Process -FilePath $mvn `
     -ArgumentList "spring-boot:run", "-Dspring-boot.run.jvmArguments=-DGATEWAY_SERVICE_KEY=$env:GATEWAY_SERVICE_KEY -DJWT_SECRET=$env:JWT_SECRET -DMODEL_CHANNEL_KEY=bailian -DVECTOR_DIMENSION=1024 -DVECTOR_MODE=memory" `
     -WorkingDirectory $ragServiceDir `
     -WindowStyle Hidden
 
-if (-not (Wait-Port -Port 6016 -TimeoutSeconds 180)) {
+if (-not (Wait-Port -Port 26016 -TimeoutSeconds 180)) {
     Write-Error "rag-service failed to start within 180 seconds"
 }
 Write-Host "rag-service is ready"
 
 Write-Host ""
 Write-Host "RAG services started:"
-Write-Host "  model-gateway: http://localhost:6015"
-Write-Host "  rag-service:   http://localhost:6016"
+Write-Host "  model-gateway: http://localhost:26015"
+Write-Host "  rag-service:   http://localhost:26016"
 Write-Host ""
 Write-Host "Note: set CHANNEL_BAILIAN_BASE_URL, CHANNEL_BAILIAN_API_KEY and CHANNEL_BAILIAN_MODELS"
 Write-Host "      before running this script to enable the Bailian channel."

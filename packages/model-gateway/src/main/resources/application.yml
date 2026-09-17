@@ -1,5 +1,5 @@
 server:
-  port: ${PORT:6015}
+  port: ${PORT:26015}
   # 优雅停机:收到 SIGTERM 后停止接新请求,存量请求(含 SSE 流)排空后再退出
   shutdown: graceful
 
@@ -33,7 +33,7 @@ gateway:
   service-key: ${GATEWAY_SERVICE_KEY:}
   # 跨域白名单(逗号分隔,支持 origin pattern);生产环境必须显式配置
   cors:
-    allowed-origins: ${CORS_ORIGINS:http://localhost:6012,http://localhost:6013}
+    allowed-origins: ${CORS_ORIGINS:http://localhost:26012,http://localhost:26013}
   jwt:
     # 只校验 NestJS 签发的 JWT(共享密钥),本网关不签发,故无过期时间配置
     secret: ${JWT_SECRET:model-gateway-dev-secret-key-please-change-in-prod}

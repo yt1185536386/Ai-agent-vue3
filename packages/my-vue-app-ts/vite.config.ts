@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-const nestPort = process.env.NESTJS_PORT || '6011'
+const nestPort = process.env.NESTJS_PORT || '26011'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -21,7 +21,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: parseInt(process.env.VITE_PORT || '6012', 10),
+    port: parseInt(process.env.VITE_PORT || '26012', 10),
     proxy: {
       '/api': {
         target: `http://localhost:${nestPort}`,

@@ -126,6 +126,5 @@ async def query_bus_route(line: str, city: str) -> str:
         # 返回可读错误让模型自行向用户解释,而不是让工具调用崩溃
         return f"公交查询出错:{e},请向用户说明情况"
 
-
 # 静态工具:任何 Agent 请求都可用
 BASE_TOOLS = [get_weather, calculator, get_current_time, query_bus_route]

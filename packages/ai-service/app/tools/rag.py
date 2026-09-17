@@ -27,9 +27,15 @@ def build_rag_tool(user_id: str, embed_provider: dict, embed_model: str):
         from app.contexteng import collector, strategy as cx_strategy
         cfg = cx_strategy.current() # 检索策略(热读,支持调参实验)
         t0 = time.perf_counter()
-        embs = await embed_texts(embed_provider, embed_model, [query]) # 向量化查询
-        async with sessionmaker()() as s: # 异步会话
-            hits = await search_chunks(s, user_id, embs[0], top_k=cfg["top_k"]) # 检索最相似的 chunks
+        try:
+            embs = await embed_texts(embed_provider, embed_model, [query]) # 向量化查询
+            async with sessionmaker()() as s: # 异步会话
+                hits = await search_chunks(s, user_id, embs[0], query=query, top_k=cfg["top_k"]) # 混合检索(余弦+BM25, RRF 融合)
+        except Exception as e:
+            # 返回可读错误让模型自行向用户解释,而不是让工具调用崩溃
+            # (崩溃会把带 tool_calls 的 AIMessage 残留在 checkpoint,
+            #  后续轮次全部被上游 400 拒绝,整个会话废掉)
+            return f"文档检索出错:{e},请向用户说明情况并建议稍后重试"
         latency_ms = int((time.perf_counter() - t0) * 1000)
         # 候选最高分(过滤前):零结果时也要记录,便于分析阈值合理性
         candidate_max = hits[0]["score"] if hits else 0.0

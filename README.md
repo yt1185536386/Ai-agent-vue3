@@ -4,11 +4,11 @@
 
 ```
 packages/
-├── my-vue-app-ts/    业务对话端(Vue3+Vite, :6012)
-├── ServerManegeUI/   管理端(Vue3+Element Plus, :6013)
-├── NestJS/           BFF 网关:鉴权/会话/规则引擎(:6011)
-├── ai-service/       Agent 服务(FastAPI+LangGraph, :6010)
-├── model-gateway/    Java 模型网关(Spring Boot, :6015)
+├── my-vue-app-ts/    业务对话端(Vue3+Vite, :26012)
+├── ServerManegeUI/   管理端(Vue3+Element Plus, :26013)
+├── NestJS/           BFF 网关:鉴权/会话/规则引擎(:26011)
+├── ai-service/       Agent 服务(FastAPI+LangGraph, :26010)
+├── model-gateway/    Java 模型网关(Spring Boot, :26015)
 ├── rag-service/      向量检索服务(Spring Boot+pgvector)
 └── eval/             Agent 离线评测脚本(Python)
 ```
@@ -77,7 +77,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=mysql
 # ② ai-service
 cd packages/ai-service
 python -m venv .venv && .venv/Scripts/pip install -r requirements.txt   # Windows
-.venv/Scripts/uvicorn app.main:app --port 6010
+.venv/Scripts/uvicorn app.main:app --port 26010
 
 # ③ NestJS BFF
 cd packages/NestJS
@@ -85,22 +85,22 @@ npm install && npm run start:dev
 
 # ④ 业务前端
 cd packages/my-vue-app-ts
-npm install && npm run dev        # http://localhost:6012
+npm install && npm run dev        # http://localhost:26012
 
 # ⑤ 管理端(可选)
 cd packages/ServerManegeUI
-npm install && npm run dev        # http://localhost:6013
+npm install && npm run dev        # http://localhost:26013
 ```
 
 启动后自查(端口通即服务就绪):
 
 | 服务 | 端口 | 健康检查 |
 |---|---|---|
-| model-gateway | 6015 | `curl http://localhost:6015/health` |
-| ai-service | 6010 | `curl http://localhost:6010/docs`(Swagger) |
-| NestJS BFF | 6011 | `curl http://localhost:6011` |
-| 业务前端 | 6012 | 浏览器打开 |
-| 管理端 | 6013 | 浏览器打开 |
+| model-gateway | 26015 | `curl http://localhost:26015/health` |
+| ai-service | 26010 | `curl http://localhost:26010/docs`(Swagger) |
+| NestJS BFF | 26011 | `curl http://localhost:26011` |
+| 业务前端 | 26012 | 浏览器打开 |
+| 管理端 | 26013 | 浏览器打开 |
 | rag-service | 5432 | `docker compose ps` |
 
 运行日志会自动写入 MySQL 各服务独立表(`log_nestjs` / `log_ai_service` /

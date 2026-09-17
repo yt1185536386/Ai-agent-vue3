@@ -389,7 +389,7 @@ Context 工程
 
 ### 7.3 配套改动
 
-- `vite.config.ts`:新增代理 `/v1/pe`、`/v1/cx` → `http://localhost:6010`;
+- `vite.config.ts`:新增代理 `/v1/pe`、`/v1/cx` → `http://localhost:26010`;
 - NestJS `permission-codes.ts`:新增 `prompt:manage`(Prompt 模板管理)、
   `prompt:view`(Prompt 监控查看)、`ctx:view`(Context 监控查看)三个权限码并 seed;
   (预留的 `dept:knowledge` 仍留给未来知识库管理功能,不混用)
