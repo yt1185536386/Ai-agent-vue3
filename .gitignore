@@ -35,6 +35,11 @@ uploads/
 .agents/
 .claude/
 
+# Markdown 文档 (除 README.md 外,所有 md 文档不提交,本地保留)
+*.md
+!README.md
+!**/README.md
+
 # 系统文件
 .DS_Store
 Thumbs.db
